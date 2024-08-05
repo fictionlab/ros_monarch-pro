@@ -1,0 +1,147 @@
+#!/usr/bin/env python
+import rospy
+# from dynamic_reconfigure.server import Server
+from std_srvs.srv import Trigger
+
+import cv2
+import numpy as np
+import datetime
+import os
+
+from monarch_lib.camera_card_controller import CameraCardController
+
+class CameraWrapper:
+    def __init__(self):
+        rospy.loginfo("Starting Monarch Pro camera ROS wrapper")
+        
+        initial_exposure = rospy.get_param("initial_exposure", 100)
+        initial_gain = rospy.get_param("initial_gain", 1)
+        self.frame_res = rospy.get_param("frame_res", [1024, 1280])
+        self.camera_controller = CameraCardController()
+
+        self.camera_controller.SetExposureFps(initial_exposure)
+        self.camera_controller.SetGain(initial_gain)
+
+        rospy.loginfo(f"SerialNumber: {self.camera_controller.GetSerialNumber()}")
+        rospy.loginfo(f"Firmware version: {self.camera_controller.GetFwVersion()}")
+        rospy.loginfo(f"API version: {self.camera_controller.GetApiVersion()}")
+        rospy.loginfo(f"Temperature: {self.camera_controller.GetTemperature()}")
+        rospy.loginfo(f"GainRatio: {self.camera_controller.GetGain()}")
+        rospy.loginfo(f"Exposure time: {self.camera_controller.GetExposureTime()}")
+
+        self.data_header = dict()
+        self.spectral_cube = None
+        self.band_count = 0
+        self.info_header = {
+            'file type':         'ENVI Standard',
+            'sensor type':       'MONARCH',
+            'wavelength units':  'nm',
+            'data type':         12,
+            'interleave':        'BSQ',
+            'byte order':        0,
+            'bit depth':         10,
+            'header offset':     0
+        }
+        self.img_save_service = rospy.Service("save_spectral_images", Trigger, self.capture_LUT_frames)
+
+    def capture_LUT_frames(self, request):
+        hs_cube = np.array(self.camera_controller.CaptureLUT())
+        low, up = self.frame_res
+        hs_cube = hs_cube.reshape(-1, low, up)
+        if hs_cube.shape[0]:
+            self.save_captured_LUT(hs_cube)
+    
+    def append_data(self, img, data):
+        if self.spectral_cube:
+            self.spectral_cube = np.concatenate((self.spectral_cube, img), axis=0)
+        else:
+            self.spectral_cube = img.copy()
+        
+        self.bands_count += 1
+        for key in data.keys():
+            if key in self.data_header:
+                self.data_header[key].append(data[key])
+            else:
+                self.data_header[key] = [data[key]]
+    
+    def save_png(self, folder,img,cwl,gain,exposure):
+        png_folder = os.path.join(folder, "png")
+        os.makedirs(png_folder, exist_ok=True)
+        file_name = f"CWL_{cwl}_Gain_{gain}_Exposure_{exposure}.png"
+        file_path = os.path.join(folder, file_name)
+        img = cv2.subtract(img, 64)
+        png_img = (img >> 2).astype(np.uint8)
+        file_path.encode(encoding='utf-8').decode('ascii')
+        cv2.imwrite(file_path, png_img, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+
+    def save(self, directory):
+        cube_shape = self.spectral_cube.shape
+
+        self.data_header['default bands'] = [self.data_header['default bands'][0]]
+        self.data_header['exposure type'] = [self.data_header['exposure type'][0]]
+
+
+        self.data_header['lines'] = cube_shape[0] // self.bands_count
+        self.data_header['samples'] = cube_shape[1]
+        self.data_header['bands'] = self.bands_count
+        
+        header_string = self.create_header_string()
+
+        now = os.path.basename(directory)
+        file_name = f'ENVI_{now}'
+
+        file_path = os.path.join(directory, file_name)
+        with open(file_path + '.raw', 'wb') as f:
+            f.write(self.spectral_cube)
+        with open(file_path + '.hdr', 'w') as f:
+            f.write(header_string)
+        self.clear() 
+
+    def save_captured_LUT(self, hs_cube):
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        folder = f"~/spectral_cube_{now}"
+        os.makedirs(folder, exist_ok=True)
+
+        DEFAULT_BANDS=None
+        for i in range(10):
+            ret=self.camera_controller.GetLUTLine(i)
+            try:
+                if not DEFAULT_BANDS:
+                    DEFAULT_BANDS=ret[3]
+                self.append_data(
+                    img=hs_cube[i],
+                    data={
+                        'wavelength':ret[3],
+                        'gain':ret[2],
+                        'exposure time':ret[1],
+                        'exposure type':"radiometric-calibration",
+                        'default bands':DEFAULT_BANDS
+                    }
+                )
+                self.save_png(folder,hs_cube[i],ret[3],ret[2],ret[1])
+            except:
+                pass
+
+        self.save(folder)
+    
+    def clear(self):
+        self.spectral_cube = None
+        self.data_header = dict()
+        self.bands_count = 0
+
+    def create_header_string(self):
+        header_string = 'ENVI\n'
+        for header in [self.info_header, self.data_header]:
+            for key, value in header.items():
+                if isinstance(value, list):
+                    header_string += f'{key} = {{\n'
+                    header_string += ',\n'.join(map(str, value))
+                    header_string += '\n}\n'
+                else:
+                    header_string += f'{key} = {value}\n'
+        return header_string
+
+if __name__ == "__main__":
+    rospy.init_node("MONARCH_PRO_camera_wrapper")
+    wrapper = CameraWrapper()
+    rospy.spin()
