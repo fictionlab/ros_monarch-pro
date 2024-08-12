@@ -798,7 +798,7 @@ void ListCommands()
 
 void SaveCaptureedLUT(CameraCardController *pmyCamera, unsigned short *bufFrames, int iLines, int iFrames)
 {
-    mkdir("./raw", S_IRWXO);
+    mkdir("./raw", S_IRWXO | S_IRWXG | S_IRWXU);
     int cwls[] = {713, 736, 759, 782, 805, 828, 851, 874, 897, 920};
     int *relCwls = pmyCamera->getIndexForCapture();
     int size = pmyCamera->GetLUTIndex() + 1;
@@ -834,12 +834,12 @@ void SaveCaptureedLUT(CameraCardController *pmyCamera, unsigned short *bufFrames
     n = n + month + day + "_" + hour + min + sec;
     string fn = "./raw/" + n;
     cout << "cube will be saved in: " << fn << endl;
-    mkdir(fn.c_str(), S_IRWXO);
+    mkdir(fn.c_str(), S_IRWXO | S_IRWXG | S_IRWXU);
     std::string name = fn + "/" + "ENVI_" + n + ".raw";
     std::string hdrName = fn + "/" + "ENVI_" + n + ".hdr";
     //save raw and png files
     string fPng = fn + "/png";
-    mkdir(fPng.c_str(), S_IRWXO);
+    mkdir(fPng.c_str(), S_IRWXO | S_IRWXG | S_IRWXU);
     for (l = 0; l < iLines; l++)
     {
         for (k = 0; k < iFrames; k++)
