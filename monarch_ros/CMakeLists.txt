@@ -6,9 +6,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
 )
 
+find_package(PNG REQUIRED)
+
 catkin_package()
 
-include_directories(${catkin_INCLUDE_DIRS})
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 
 add_executable(test_node
   src/test_node.cpp
@@ -16,6 +20,7 @@ add_executable(test_node
 
 target_link_libraries(test_node
   ${catkin_LIBRARIES}
+  png
 )
 
 install(TARGETS test_node
