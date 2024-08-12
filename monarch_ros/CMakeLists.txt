@@ -14,15 +14,15 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(test_node
-  src/test_node.cpp
+add_executable(camera_wrapper
+  src/camera_wrapper.cpp
 )
 
-target_link_libraries(test_node
+target_link_libraries(camera_wrapper
   ${catkin_LIBRARIES}
   png
 )
 
-install(TARGETS test_node
+install(TARGETS camera_wrapper
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
