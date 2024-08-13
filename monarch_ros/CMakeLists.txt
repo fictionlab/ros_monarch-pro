@@ -4,11 +4,16 @@ project(monarch_ros)
 find_package(catkin REQUIRED COMPONENTS
   monarch_sdk
   roscpp
+  leo_msgs
 )
 
 find_package(PNG REQUIRED)
 
-catkin_package()
+catkin_package(
+  CATKIN_DEPENDS
+    leo_msgs
+    roscpp
+)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}

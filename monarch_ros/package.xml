@@ -16,9 +16,11 @@
   <build_depend>monarch_sdk</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>libpng-dev</build_depend>
-
+  <build_depend>leo_msgs</build_depend>
+  
   <exec_depend>monarch_sdk</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>libpng-dev</exec_depend>
+  <exec_depend>leo_msgs</exec_depend>
 
 </package>
