@@ -31,5 +31,4 @@ private:
 
   std::unique_ptr<CameraCardController> myCamera;
   unsigned short bufRunLUTFrames[10 * 1024 * 1280];
-  int bufRunLUTFramesSize = 10;
 };

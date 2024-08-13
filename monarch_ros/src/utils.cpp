@@ -191,9 +191,7 @@ void CameraWrapper::SaveCapturedLUT(unsigned short *bufFrames, int iLines,
 bool CameraWrapper::CaptureLUTFrames(std::string path) {
   int hr = 0;
   try {
-    // bufRunLUTFramesSize = 1;
     hr = myCamera->CaptureLUT(1, bufRunLUTFrames);
-    // int iNL = 10;
     SaveCapturedLUT(bufRunLUTFrames, 10, 1, path);
   } catch (const std::exception &) {
     return false;

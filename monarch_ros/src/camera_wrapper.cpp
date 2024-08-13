@@ -6,9 +6,6 @@
 #include "utils.hpp"
 
 static ros::ServiceServer save_images_service;
-// static std::unique_ptr<CameraCardController> myCamera;
-static unsigned short bufRunLUTFrames[10 * 1024 * 1280];
-static int bufRunLUTFramesSize = 10;
 static CameraWrapper *wrapper;
 
 bool save_images_callback(leo_msgs::MonarchRosSavePathRequest &req,
