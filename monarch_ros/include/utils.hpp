@@ -5,8 +5,8 @@
 
 class CameraWrapper {   
     public:
-        CameraWrapper();
         CameraWrapper(int fps, float gain);
+        ~CameraWrapper();
         void save_png(const char *path, void *data, int width, int height);
         void CaptureToFile(std::string strFN, unsigned short *usBuff, int iL, std::string pngName);
         void SaveCapturedLUT(unsigned short *bufFrames, int iLines, int iFrames);

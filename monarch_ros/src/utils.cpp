@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "utils.hpp"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -16,6 +16,11 @@ CameraWrapper::CameraWrapper(int fps, float gain) {
         myCamera->SetExposureFps(fps);
         myCamera->SetGain(gain);
     }
+}
+
+CameraWrapper::~CameraWrapper() {
+    myCamera->Release();
+    myCamera.reset();
 }
 
 void CameraWrapper::save_png(const char *path, void *data, int width, int height)
@@ -78,7 +83,7 @@ void CameraWrapper::CaptureToFile(std::string strFN, unsigned short *usBuff, int
 
 void CameraWrapper::SaveCapturedLUT(unsigned short *bufFrames, int iLines, int iFrames)
 {
-    mkdir("./raw", S_IRWXO | S_IRWXG | S_IRWXU);
+    mkdir("~/raw", S_IRWXO | S_IRWXG | S_IRWXU);
     int cwls[] = {713, 736, 759, 782, 805, 828, 851, 874, 897, 920};
     int *relCwls = myCamera->getIndexForCapture();
     int size = myCamera->GetLUTIndex() + 1;
