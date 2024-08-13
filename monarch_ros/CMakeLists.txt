@@ -26,6 +26,13 @@ target_link_libraries(camera_wrapper
 
 include_directories(include)
 
+install(
+  DIRECTORY
+    config
+    launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
 install(TARGETS camera_wrapper
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

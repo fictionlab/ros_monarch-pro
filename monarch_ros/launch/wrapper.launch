@@ -1,0 +1,12 @@
+<launch> 
+    <node name="monarch_pro_wrapper"
+          pkg="monarch_ros"
+          type="camera_wrapper"
+          output="screen">
+      <rosparam command="load" 
+                file="$(find monarch_ros)/config/camera_config.yaml"/>
+
+    </node>
+  
+</launch>
+  
