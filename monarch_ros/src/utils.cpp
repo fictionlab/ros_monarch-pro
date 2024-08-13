@@ -299,3 +299,7 @@ std::stringstream CameraWrapper::DisplayAllData() {
 
   return data;
 }
+
+void CameraWrapper::SetFps(int fps) { myCamera->SetExposureFps(fps); }
+
+void CameraWrapper::SetGain(float gain) { myCamera->SetGain(gain); }

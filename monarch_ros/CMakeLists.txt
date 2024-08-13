@@ -5,9 +5,14 @@ find_package(catkin REQUIRED COMPONENTS
   monarch_sdk
   roscpp
   leo_msgs
+  dynamic_reconfigure
 )
 
 find_package(PNG REQUIRED)
+
+generate_dynamic_reconfigure_options(
+  cfg/CameraParams.cfg
+)
 
 catkin_package(
   CATKIN_DEPENDS

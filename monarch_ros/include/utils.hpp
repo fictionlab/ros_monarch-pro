@@ -14,13 +14,15 @@ public:
                        std::string path);
   bool CaptureLUTFrames(std::string path);
   std::stringstream DisplayAllData();
+  std::stringstream DisplayGainRatio();
+  std::stringstream DisplayExposureTime();
+  void SetGain(float gain);
+  void SetFps(int fps);
 
   bool cameraFound = false;
 
 private:
   std::stringstream DisplayACTD();
-  std::stringstream DisplayGainRatio();
-  std::stringstream DisplayExposureTime();
   std::stringstream DisplayTemperture();
   std::stringstream DisplaySerialNumber();
   std::stringstream DisplayFWVersion();
