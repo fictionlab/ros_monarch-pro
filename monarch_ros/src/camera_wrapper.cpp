@@ -2,7 +2,6 @@
 #include <monarch_ros/CameraParamsConfig.h>
 #include <signal.h>
 
-#include "leo_msgs/MonarchRosSavePath.h"
 #include "ros/ros.h"
 #include "std_srvs/Trigger.h"
 #include "utils.hpp"
@@ -11,20 +10,13 @@ static ros::ServiceServer save_images_service;
 static CameraWrapper *wrapper;
 static int fps;
 static float gain;
+static std::string path = "";
 
-bool save_images_callback(leo_msgs::MonarchRosSavePathRequest &req,
-                          leo_msgs::MonarchRosSavePathResponse &res) {
-  std::string path = "";
+bool save_images_callback(std_srvs::TriggerRequest &req,
+                          std_srvs::TriggerResponse &res) {
   std::stringstream message;
 
   message << "Files saved in ";
-
-  if (req.path == "") {
-    ROS_INFO("Empty path provided - saving content in home directory");
-    path = getenv("HOME");
-  } else {
-    path = req.path;
-  }
 
   message << path;
 
@@ -75,6 +67,9 @@ int main(int argc, char **argv) {
   ros::NodeHandle pnh("~");
   fps = pnh.param("exposure_fps", 100);
   gain = pnh.param("gain", 1.0);
+
+  const std::string home_path = getenv("HOME");
+  path = pnh.param("data_path", home_path);
 
   wrapper = new CameraWrapper(fps, gain);
 
